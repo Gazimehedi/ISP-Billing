@@ -126,7 +126,8 @@ const handleLogin = async () => {
         await axios.get('/sanctum/csrf-cookie');
         const response = await axios.post('/login', form);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        alert('Login Successful!');
+        localStorage.setItem('is_auth', 'true');
+        router.push('/dashboard');
     } catch (err) {
         error.value = err.response?.data?.message || 'Login failed. Please check your credentials.';
     } finally {
