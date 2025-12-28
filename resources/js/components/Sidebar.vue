@@ -86,9 +86,12 @@ const menuGroups = ref([
     label: 'Configuration',
     icon: 'ConfigIcon',
     items: [
-      { label: 'Mikrotik Router', to: '/config/mikrotik' },
-      { label: 'Zone', to: '/config/zone' },
-      { label: 'Sub Zone', to: '/config/subzone' }
+      { label: 'Mikrotik Router', to: '/configuration/router' },
+      { label: 'Zone', to: '/configuration/zone' },
+      { label: 'Sub Zone', to: '/configuration/sub-zone' },
+      { label: 'Box', to: '/configuration/box' },
+      { label: 'Client Type', to: '/configuration/client-type' },
+      { label: 'Connection Type', to: '/configuration/connection-type' }
     ]
   },
   {

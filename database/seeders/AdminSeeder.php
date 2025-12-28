@@ -14,7 +14,7 @@ class AdminSeeder extends Seeder
     {
         \App\Models\User::create([
             'name' => 'Super Admin',
-            'mobile' => '01899999999',
+            'mobile' => '01730891770',
             'password' => \Illuminate\Support\Facades\Hash::make('123456'),
             'role' => 'admin',
         ]);

@@ -31,6 +31,36 @@ const routes = [
                 component: Dashboard,
             },
             {
+                path: 'configuration/router',
+                name: 'MikrotikRouter',
+                component: () => import('../pages/config/MikrotikRouter.vue'),
+            },
+            {
+                path: 'configuration/zone',
+                name: 'Zone',
+                component: () => import('../pages/config/Zone.vue'),
+            },
+            {
+                path: 'configuration/sub-zone',
+                name: 'SubZone',
+                component: () => import('../pages/config/SubZone.vue'),
+            },
+            {
+                path: 'configuration/box',
+                name: 'Box',
+                component: () => import('../pages/config/Box.vue'),
+            },
+            {
+                path: 'configuration/client-type',
+                name: 'ClientType',
+                component: () => import('../pages/config/ClientType.vue'),
+            },
+            {
+                path: 'configuration/connection-type',
+                name: 'ConnectionType',
+                component: () => import('../pages/config/ConnectionType.vue'),
+            },
+            {
                 path: '',
                 redirect: '/dashboard'
             }

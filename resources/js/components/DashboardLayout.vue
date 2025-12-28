@@ -21,7 +21,7 @@
       <Topbar @toggle-sidebar="toggleSidebar" />
 
       <!-- Page Content -->
-      <main class="flex-1 overflow-x-hidden overflow-y-auto p-2 sm:p-3 md:p-4 scrollbar-thin scrollbar-thumb-gray-300">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
         <router-view></router-view>
       </main>
     </div>
