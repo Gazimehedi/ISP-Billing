@@ -98,8 +98,9 @@ const menuGroups = ref([
     label: 'OLT Configuration',
     icon: 'OltIcon',
     items: [
-      { label: 'OLT Management', to: '/olt/management' },
-      { label: 'OLT Users', to: '/olt/users' }
+      { label: 'OLT', to: '/olt/list' },
+      { label: 'OLT Users', to: '/olt-configuration/olt-users' },
+      { label: 'Service Profiles', to: '/olt-configuration/service-profiles' }
     ]
   },
   {

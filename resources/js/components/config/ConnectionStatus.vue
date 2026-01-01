@@ -6,6 +6,10 @@ const props = defineProps({
     routerId: {
         type: [Number, String],
         required: true
+    },
+    type: {
+        type: String,
+        default: 'mikrotik' // 'mikrotik' or 'olt'
     }
 });
 
@@ -15,8 +19,16 @@ const message = ref('');
 const checkConnection = async () => {
     status.value = 'checking';
     message.value = '';
+    
+    let url = '';
+    if (props.type === 'mikrotik') {
+        url = `/api/config/mikrotik-routers/${props.routerId}/test-connection`;
+    } else if (props.type === 'olt') {
+        url = `/api/config/olts/${props.routerId}/test-connection`;
+    }
+
     try {
-        await axios.post(`/api/config/mikrotik-routers/${props.routerId}/test-connection`);
+        await axios.post(url);
         status.value = 'connected';
     } catch (error) {
         status.value = 'failed';

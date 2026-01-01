@@ -61,6 +61,21 @@ const routes = [
                 component: () => import('../pages/config/ConnectionType.vue'),
             },
             {
+                path: 'olt/list',
+                name: 'OltList',
+                component: () => import('../pages/config/Olt.vue'),
+            },
+            {
+                path: 'olt-configuration/olt-users',
+                name: 'OltUsers',
+                component: () => import('../pages/config/OltUsers.vue'),
+            },
+            {
+                path: 'olt-configuration/service-profiles',
+                name: 'ServiceProfiles',
+                component: () => import('../pages/config/ServiceProfiles.vue'),
+            },
+            {
                 path: '',
                 redirect: '/dashboard'
             }
