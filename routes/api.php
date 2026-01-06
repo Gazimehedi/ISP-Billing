@@ -54,6 +54,10 @@ Route::prefix('config')->group(function () {
     // Zone
     Route::apiResource('zones', ZoneController::class);
 
+    // Client Management
+    Route::apiResource('clients', App\Http\Controllers\Api\Client\ClientController::class);
+    Route::apiResource('packages', App\Http\Controllers\Api\Client\PackageController::class); // Need to create PackageController briefly or just use a simple one
+
     // Sub Zone
     Route::apiResource('sub-zones', App\Http\Controllers\Api\Config\SubZoneController::class);
 

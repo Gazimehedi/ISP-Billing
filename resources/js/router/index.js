@@ -76,6 +76,16 @@ const routes = [
                 component: () => import('../pages/config/ServiceProfiles.vue'),
             },
             {
+                path: 'client/all',
+                name: 'ClientList',
+                component: () => import('../pages/client/ClientList.vue'),
+            },
+            {
+                path: 'client/add',
+                name: 'ClientAdd',
+                component: () => import('../pages/client/ClientAdd.vue'),
+            },
+            {
                 path: '',
                 redirect: '/dashboard'
             }

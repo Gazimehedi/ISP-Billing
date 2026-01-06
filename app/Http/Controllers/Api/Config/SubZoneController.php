@@ -29,6 +29,10 @@ class SubZoneController extends Controller
             });
         }
 
+        if ($request->has('no_paginate')) {
+            return response()->json($query->get());
+        }
+
         $subZones = $query->latest()->paginate(10);
 
         return response()->json($subZones);

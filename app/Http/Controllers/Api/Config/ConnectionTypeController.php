@@ -20,6 +20,10 @@ class ConnectionTypeController extends Controller
             $query->where('name', 'like', "%{$search}%");
         }
 
+        if ($request->boolean('no_paginate')) {
+            return response()->json($query->get());
+        }
+
         $types = $query->latest()->paginate(10);
         return response()->json($types);
     }

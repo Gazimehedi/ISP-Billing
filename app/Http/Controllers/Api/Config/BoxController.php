@@ -21,6 +21,10 @@ class BoxController extends Controller
             $query->where('sub_zone_id', $request->input('sub_zone_id'));
         }
 
+        if ($request->has('zone_id')) {
+            $query->where('zone_id', $request->input('zone_id'));
+        }
+
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
@@ -29,6 +33,10 @@ class BoxController extends Controller
                       $sq->where('name', 'like', "%{$search}%");
                   });
             });
+        }
+
+        if ($request->has('no_paginate')) {
+            return response()->json($query->get());
         }
 
         $boxes = $query->latest()->paginate(10);

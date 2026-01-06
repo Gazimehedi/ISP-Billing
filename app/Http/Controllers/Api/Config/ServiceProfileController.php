@@ -28,6 +28,10 @@ class ServiceProfileController extends Controller
             $query->where('is_active', $request->is_active);
         }
 
+        if ($request->boolean('no_paginate')) {
+            return response()->json($query->get());
+        }
+
         $profiles = $query->latest()->paginate($request->per_page ?? 15);
         return response()->json($profiles);
     }

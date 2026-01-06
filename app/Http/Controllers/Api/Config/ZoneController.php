@@ -20,6 +20,10 @@ class ZoneController extends Controller
             $query->where('name', 'like', "%{$search}%");
         }
 
+        if ($request->boolean('no_paginate')) {
+            return response()->json($query->get());
+        }
+
         $zones = $query->latest()->paginate(10);
 
         return response()->json($zones);

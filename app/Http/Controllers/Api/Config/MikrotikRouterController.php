@@ -24,6 +24,10 @@ class MikrotikRouterController extends Controller
                   ->orWhere('username', 'like', "%{$search}%");
         }
 
+        if ($request->boolean('no_paginate')) {
+            return response()->json($query->get());
+        }
+
         $routers = $query->latest()->paginate(10);
 
         return response()->json($routers);
