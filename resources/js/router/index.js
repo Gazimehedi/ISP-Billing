@@ -86,6 +86,21 @@ const routes = [
                 component: () => import('../pages/client/ClientAdd.vue'),
             },
             {
+                path: 'client/edit/:id',
+                name: 'ClientEdit',
+                component: () => import('../pages/client/ClientEdit.vue'),
+            },
+            {
+                path: 'client/view/:id',
+                name: 'ClientView',
+                component: () => import('../pages/client/ClientView.vue'),
+            },
+            {
+                path: 'olt/monitoring',
+                name: 'OltMonitoring',
+                component: () => import('../pages/olt/Monitoring.vue'),
+            },
+            {
                 path: '',
                 redirect: '/dashboard'
             }

@@ -70,6 +70,9 @@
                 <table class="w-full text-left">
                     <thead class="bg-[#f1f5f9] border-b border-gray-100">
                         <tr>
+                            <th class="px-4 py-3 text-center w-10">
+                                <input type="checkbox" @change="toggleAll" :checked="isAllSelected" class="rounded text-cyan-600 focus:ring-cyan-500 h-3.5 w-3.5 border-gray-300">
+                            </th>
                             <th v-for="col in visibleColumns" :key="col.key" class="px-4 py-3 text-[11px] font-bold text-gray-600 uppercase">
                                 {{ col.label }}
                             </th>
@@ -95,7 +98,10 @@
                                 </div>
                             </td>
                         </tr>
-                        <tr v-for="user in users" :key="user.id" class="hover:bg-blue-50/20 transition-colors group">
+                        <tr v-for="user in users" :key="user.id" class="hover:bg-blue-50/20 transition-colors group" :class="{ 'bg-blue-50/10': selectedUsers.includes(user.id) }">
+                           <td class="px-4 py-3 text-center">
+                               <input type="checkbox" v-model="selectedUsers" :value="user.id" class="rounded text-cyan-600 focus:ring-cyan-500 h-3.5 w-3.5 border-gray-300">
+                           </td>
                            <td v-if="isColVisible('client_id')" class="px-4 py-3 text-xs font-semibold text-gray-700">{{ user.id }}</td>
                            <td v-if="isColVisible('name_address')" class="px-4 py-3">
                                <div class="text-xs font-bold text-gray-800">{{ user.name }}</div>
@@ -199,6 +205,87 @@
                 </div>
             </div>
         </div>
+
+        <!-- Signal Trend Modal -->
+        <div v-if="showSignalModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showSignalModal = false"></div>
+            <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-cyan-50">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide">ONU Signal Trends</h3>
+                        <p class="text-xs text-gray-500 mt-1">{{ selectedUser?.name || 'Loading...' }}</p>
+                    </div>
+                    <button @click="showSignalModal = false" class="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <SignalTrendChart 
+                        v-if="selectedUser" 
+                        :olt-user-id="selectedUser.id"
+                        :title="`Signal History - ${selectedUser.name}`"
+                        :subtitle="`Serial: ${selectedUser.serial_number} | Interface: ${selectedUser.interface}`"
+                    />
+                </div>
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                    <div class="grid grid-cols-4 gap-4 text-xs">
+                        <div class="text-center">
+                            <p class="text-gray-500 font-medium mb-1">Current Signal</p>
+                            <p :class="getSignalClass(selectedUser?.signal)" class="text-lg font-bold">{{ selectedUser?.signal || 'N/A' }} dBm</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-gray-500 font-medium mb-1">Temperature</p>
+                            <p class="text-lg font-bold text-gray-700">{{ selectedUser?.temp || 'N/A' }}°C</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-gray-500 font-medium mb-1">Distance</p>
+                            <p class="text-lg font-bold text-gray-700">{{ selectedUser?.distance || '0m' }}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-gray-500 font-medium mb-1">Status</p>
+                            <p class="text-lg font-bold" :class="selectedUser?.status === 'online' ? 'text-emerald-600' : 'text-red-600'">
+                                {{ selectedUser?.status || 'Unknown' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Bulk Action Bar -->
+        <div v-if="selectedUsers.length > 0" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-5 duration-300">
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl px-6 py-3 flex items-center gap-6 ring-1 ring-white/10 backdrop-blur-xl">
+                <div class="flex items-center gap-2 border-r border-slate-700 pr-6 mr-2">
+                    <span class="bg-cyan-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">{{ selectedUsers.length }}</span>
+                    <span class="text-xs font-bold text-slate-300 uppercase tracking-widest leading-none">Selected</span>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <button @click="handleBulkAction('reboot')" class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl transition-all border border-slate-700/50 group">
+                        <svg class="w-4 h-4 text-cyan-400 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <span class="text-[11px] font-black uppercase tracking-wider">Bulk Reboot</span>
+                    </button>
+                    
+                    <button @click="handleBulkAction('sync_signal')" class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl transition-all border border-slate-700/50 group">
+                        <svg class="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span class="text-[11px] font-black uppercase tracking-wider">Sync Signals</span>
+                    </button>
+                    
+                    <button @click="handleBulkAction('deactivate')" class="flex items-center gap-2 px-4 py-2 bg-[#f43f5e]/10 hover:bg-[#f43f5e] text-[#f43f5e] hover:text-white rounded-xl transition-all border border-[#f43f5e]/20 group">
+                        <svg class="w-4 h-4 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                        <span class="text-[11px] font-black uppercase tracking-wider">Deactivate All</span>
+                    </button>
+                </div>
+
+                <div class="border-l border-slate-700 pl-4">
+                    <button @click="selectedUsers = []" class="p-2 text-slate-500 hover:text-white transition-colors" title="Clear Selection">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -206,6 +293,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import SignalTrendChart from '../../components/SignalTrendChart.vue';
 
 // State
 const users = ref([]);
@@ -217,10 +305,17 @@ const pagination = ref({ current_page: 1, last_page: 0, total: 0 });
 
 const showFilterModal = ref(false);
 const showVisibilityMenu = ref(false);
+const showSignalModal = ref(false);
+const selectedUser = ref(null);
 
 const filter = ref({
     olt_id: '',
     status: ''
+});
+
+const selectedUsers = ref([]);
+const isAllSelected = computed(() => {
+    return users.value.length > 0 && selectedUsers.value.length === users.value.length;
 });
 
 // Column Configuration
@@ -365,19 +460,8 @@ const rebootOnu = async (user) => {
 };
 
 const viewDetails = (user) => {
-    Swal.fire({
-        title: `<span class="text-sm font-bold uppercase">ONU Information</span>`,
-        html: `
-            <div class="text-left space-y-2 text-xs font-medium text-gray-600">
-                <div class="flex justify-between border-b pb-1"><span>Name:</span> <span class="text-gray-900">${user.name}</span></div>
-                <div class="flex justify-between border-b pb-1"><span>Serial / MAC:</span> <span class="text-gray-900">${user.serial_number}</span></div>
-                <div class="flex justify-between border-b pb-1"><span>Interface:</span> <span class="text-gray-900">${user.olt_name} / ${user.interface}</span></div>
-                <div class="flex justify-between border-b pb-1"><span>Signal:</span> <span class="${getSignalClass(user.signal)}">${user.signal || 'N/A'} dBm</span></div>
-                <div class="flex justify-between border-b pb-1"><span>Status:</span> <span class="font-bold">${user.status || 'N/A'}</span></div>
-            </div>
-        `,
-        confirmButtonColor: '#1e293b'
-    });
+    selectedUser.value = user;
+    showSignalModal.value = true;
 };
 
 // Listeners
@@ -388,9 +472,86 @@ watch(searchQuery, (val) => {
 watch(perPage, () => fetchUsers());
 
 onMounted(() => {
-    fetchUsers();
     fetchOlts();
+    fetchUsers();
 });
+
+const toggleAll = () => {
+    if (isAllSelected.value) {
+        selectedUsers.value = [];
+    } else {
+        selectedUsers.value = users.value.map(u => u.id);
+    }
+};
+
+const handleBulkAction = async (action) => {
+    let title = '';
+    let text = '';
+    let confirmBtn = '';
+    
+    switch (action) {
+        case 'reboot': 
+            title = 'Bulk Reboot?';
+            text = `You are about to reboot ${selectedUsers.value.length} ONUs. This will cause service interruption.`;
+            confirmBtn = 'Yes, Reboot All';
+            break;
+        case 'sync_signal':
+            title = 'Sync All Signals?';
+            text = `This will connect to OLTs and fetch real-time signal strength for ${selectedUsers.value.length} users.`;
+            confirmBtn = 'Sync Now';
+            break;
+        case 'deactivate':
+            title = 'Deactivate ONUs?';
+            text = `Warning: This will unprovision ${selectedUsers.value.length} ONUs from their respective OLTs.`;
+            confirmBtn = 'Confirm Deactivation';
+            break;
+    }
+
+    const result = await Swal.fire({
+        title,
+        text,
+        icon: action === 'sync_signal' ? 'info' : 'warning',
+        showCancelButton: true,
+        confirmButtonColor: action === 'deactivate' ? '#f43f5e' : '#0d9488',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: confirmBtn,
+        reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+        loading.value = true;
+        try {
+            const res = await axios.post('/api/config/olt-users/bulk-action', {
+                ids: selectedUsers.value,
+                action: action
+            });
+
+            const successCount = res.data.results.filter(r => r.status === 'success').length;
+            const failCount = res.data.results.filter(r => r.status === 'error').length;
+
+            await Swal.fire({
+                icon: failCount === 0 ? 'success' : 'warning',
+                title: 'Action Completed',
+                html: `
+                    <div class="text-left text-sm space-y-1">
+                        <p class="text-emerald-600 font-bold">Successfully processed: ${successCount}</p>
+                        ${failCount > 0 ? `<p class="text-red-500 font-bold">Failed: ${failCount}</p>` : ''}
+                    </div>
+                `,
+                confirmButtonColor: '#0d9488'
+            });
+
+            if (successCount > 0) {
+                selectedUsers.value = [];
+                fetchUsers();
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Bulk action failed to initiate.', 'error');
+        } finally {
+            loading.value = false;
+        }
+    }
+};
 </script>
 
 <style scoped>

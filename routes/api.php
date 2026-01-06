@@ -40,6 +40,7 @@ Route::prefix('config')->group(function () {
     Route::post('olts/{olt}/sync-users', [OltUserController::class, 'sync']);
     Route::get('olts/{olt}/check-onu/{onuId}', [OltController::class, 'checkOnuInfo']);
 
+    Route::post('olt-users/bulk-action', [OltUserController::class, 'bulkAction']);
     Route::apiResource('olt-users', OltUserController::class);
 
     // Service Profiles
@@ -69,4 +70,11 @@ Route::prefix('config')->group(function () {
 
     // Connection Type
     Route::apiResource('connection-types', App\Http\Controllers\Api\Config\ConnectionTypeController::class);
+
+    // Monitoring
+    Route::get('monitoring/summary', [App\Http\Controllers\Api\Config\MonitoringController::class, 'getSummary']);
+    Route::post('monitoring/sync-signals', [App\Http\Controllers\Api\Config\MonitoringController::class, 'syncSignals']);
+    Route::get('monitoring/signal-trends/{oltUserId}', [App\Http\Controllers\Api\Config\MonitoringController::class, 'getSignalTrends']);
+    Route::get('monitoring/alerts', [App\Http\Controllers\Api\Config\MonitoringController::class, 'getAlerts']);
+    Route::post('monitoring/alerts/{alertId}/resolve', [App\Http\Controllers\Api\Config\MonitoringController::class, 'resolveAlert']);
 });

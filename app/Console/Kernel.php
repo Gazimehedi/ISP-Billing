@@ -12,7 +12,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Sync OLT signals every 10 minutes
+        $schedule->command('olt:sync-signals')
+            ->everyTenMinutes()
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**

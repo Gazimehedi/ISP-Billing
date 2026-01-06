@@ -129,7 +129,7 @@ class ClientController extends Controller
      */
     public function show(Client $client)
     {
-        return response()->json($client->load(['zone', 'subZone', 'package', 'box', 'serviceProfile', 'employee']));
+        return response()->json($client->load(['zone', 'subZone', 'package', 'box', 'serviceProfile', 'employee', 'server']));
     }
 
     /**

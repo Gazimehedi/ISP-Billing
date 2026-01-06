@@ -699,13 +699,42 @@ onMounted(() => {
 
 <style scoped>
 .input-pill-light {
-    @apply w-full rounded-2xl border-transparent bg-[#f3f6f9] text-gray-700 text-[11px] py-1.5 px-4 outline-none focus:ring-2 focus:ring-sky-500/50 transition-all border border-gray-100;
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px solid #f1f5f9;
+    background-color: #f3f6f9;
+    color: #374151;
+    font-size: 11px;
+    padding: 0.375rem 1rem;
+    outline: none;
+    transition: all 0.2s ease;
 }
+.input-pill-light:focus {
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) rgba(14, 165, 233, 0.5);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
 .select-pill-light {
-    @apply w-full rounded-2xl border-transparent bg-[#f3f6f9] text-gray-700 text-[11px] py-1.5 px-4 outline-none focus:ring-2 focus:ring-sky-500/50 transition-all border border-gray-100 appearance-none bg-no-repeat;
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px solid #f1f5f9;
+    background-color: #f3f6f9;
+    color: #374151;
+    font-size: 11px;
+    padding: 0.375rem 1rem;
+    outline: none;
+    transition: all 0.2s ease;
+    appearance: none;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1.25em 1.25em;
+}
+.select-pill-light:focus {
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) rgba(14, 165, 233, 0.5);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
 }
 
 /* Custom scrollbar */

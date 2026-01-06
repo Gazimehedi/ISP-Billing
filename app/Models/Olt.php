@@ -19,6 +19,7 @@ class Olt extends Model
         'host',
         'port',
         'status',
+        'is_active',
     ];
 
     protected $hidden = [

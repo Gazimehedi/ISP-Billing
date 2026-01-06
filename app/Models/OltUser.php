@@ -14,6 +14,7 @@ class OltUser extends Model
         'service_profile_id',
         'name',
         'serial_number',
+        'ont_id',
         'interface',
         'status',
         'signal',
@@ -38,5 +39,13 @@ class OltUser extends Model
     public function serviceProfile()
     {
         return $this->belongsTo(ServiceProfile::class);
+    }
+
+    /**
+     * Get all signal history records for this ONU
+     */
+    public function signalHistories()
+    {
+        return $this->hasMany(OltSignalHistory::class);
     }
 }

@@ -100,7 +100,8 @@ const menuGroups = ref([
     items: [
       { label: 'OLT', to: '/olt/list' },
       { label: 'OLT Users', to: '/olt-configuration/olt-users' },
-      { label: 'Service Profiles', to: '/olt-configuration/service-profiles' }
+      { label: 'Service Profiles', to: '/olt-configuration/service-profiles' },
+      { label: 'Monitoring', to: '/olt/monitoring' }
     ]
   },
   {

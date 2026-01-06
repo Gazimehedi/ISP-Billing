@@ -55,7 +55,10 @@ class OltUserController extends Controller
 
                 OltUser::updateOrCreate(
                     ['olt_id' => $olt->id, 'serial_number' => $userData['serial_number']],
-                    array_merge($userData, ['olt_id' => $olt->id])
+                    array_merge($userData, [
+                        'olt_id' => $olt->id,
+                        'ont_id' => $userData['ont_id'] ?? null
+                    ])
                 );
                 $count++;
             }
@@ -72,5 +75,71 @@ class OltUserController extends Controller
                 'message' => 'Sync failed: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Perform bulk actions on OLT users
+     */
+    public function bulkAction(Request $request, OltService $service)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'action' => 'required|string|in:reboot,sync_signal,deactivate',
+        ]);
+
+        $ids = $validated['ids'];
+        $action = $validated['action'];
+        $results = [];
+
+        // Group users by OLT to minimize connections
+        $usersByOlt = OltUser::with('olt')->whereIn('id', $ids)->get()->groupBy('olt_id');
+
+        foreach ($usersByOlt as $oltId => $users) {
+            $olt = $users->first()->olt;
+            try {
+                $driver = $service->getDriver($olt);
+                $driver->connect();
+
+                foreach ($users as $user) {
+                    try {
+                        switch ($action) {
+                            case 'reboot':
+                                // Most drivers might need interface + ont_id or serial
+                                // We'll pass both if available to the driver's reboot method
+                                // Assuming we update OltService->reboot or call driver directly
+                                $driver->reboot($user->ont_id ?: $user->serial_number);
+                                $results[] = ['id' => $user->id, 'status' => 'success', 'message' => 'Reboot command sent'];
+                                break;
+                            case 'sync_signal':
+                                $info = $driver->checkOnuInfo($user->ont_id ?: $user->serial_number);
+                                // If driver returns parsed signal, we update it
+                                if (isset($info['signal'])) {
+                                     $user->update(['signal' => $info['signal']]);
+                                }
+                                $results[] = ['id' => $user->id, 'status' => 'success', 'message' => 'Signal synced', 'data' => $info];
+                                break;
+                            case 'deactivate':
+                                $driver->deactivateOnu($user->interface, $user->serial_number);
+                                $user->update(['status' => 'Deactivated']);
+                                $results[] = ['id' => $user->id, 'status' => 'success', 'message' => 'Deactivated'];
+                                break;
+                        }
+                    } catch (\Exception $e) {
+                        $results[] = ['id' => $user->id, 'status' => 'error', 'message' => $e->getMessage()];
+                    }
+                }
+
+                $driver->disconnect();
+            } catch (\Exception $e) {
+                foreach ($users as $user) {
+                    $results[] = ['id' => $user->id, 'status' => 'error', 'message' => "OLT [{$olt->name}] connection failed: " . $e->getMessage()];
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'results' => $results
+        ]);
     }
 }

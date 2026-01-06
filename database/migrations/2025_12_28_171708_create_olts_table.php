@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('host');
             $table->integer('port')->default(161);
             $table->boolean('status')->default(true);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
