@@ -101,6 +101,16 @@ const routes = [
                 component: () => import('../pages/olt/Monitoring.vue'),
             },
             {
+                path: 'employee/all',
+                name: 'EmployeeList',
+                component: () => import('../pages/employee/EmployeeList.vue'),
+            },
+            {
+                path: 'employee-setting/role',
+                name: 'RoleList',
+                component: () => import('../pages/employee/RoleList.vue'),
+            },
+            {
                 path: '',
                 redirect: '/dashboard'
             }

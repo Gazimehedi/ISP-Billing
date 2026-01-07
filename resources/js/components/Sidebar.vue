@@ -125,7 +125,10 @@ const menuGroups = ref([
   {
     label: 'Employee',
     icon: 'EmployeeIcon',
-    items: []
+    items: [
+      { label: 'ALL Employee', to: '/employee/all' },
+      { label: 'Role Management', to: '/employee-setting/role' }
+    ]
   },
   {
     label: 'Reseller',

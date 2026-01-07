@@ -62,6 +62,10 @@ Route::prefix('config')->group(function () {
     // Sub Zone
     Route::apiResource('sub-zones', App\Http\Controllers\Api\Config\SubZoneController::class);
 
+    // Employee Management
+    Route::apiResource('employees', App\Http\Controllers\Api\Employee\EmployeeController::class);
+    Route::apiResource('roles', App\Http\Controllers\Api\Employee\RoleController::class);
+
     // Box
     Route::apiResource('boxes', App\Http\Controllers\Api\Config\BoxController::class);
 
