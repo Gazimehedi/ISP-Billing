@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Api\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\MikrotikRouter;
+use App\Services\RouterOSService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
@@ -37,7 +41,36 @@ class ClientController extends Controller
         if ($request->filled('status')) $query->where('status', $request->status);
         if ($request->filled('payment_status')) $query->where('payment_status', $request->payment_status);
         if ($request->filled('billing_type')) $query->where('billing_type', $request->billing_type);
-        if ($request->filled('client_type')) $query->where('client_type', $request->client_type);
+        if ($request->filled('client_type_id')) $query->where('client_type', $request->client_type_id); // Changed to match frontend
+
+        // Date Range Filters
+        if ($request->filled('billing_cycle_start') && $request->filled('billing_cycle_end')) {
+            $query->whereBetween('billing_date', [$request->billing_cycle_start, $request->billing_cycle_end]);
+        }
+        if ($request->filled('expire_date_start') && $request->filled('expire_date_end')) {
+            $query->whereBetween('expire_date', [$request->expire_date_start, $request->expire_date_end]);
+        }
+        if ($request->filled('promise_date_start') && $request->filled('promise_date_end')) {
+            $query->whereBetween('promise_date', [$request->promise_date_start, $request->promise_date_end]);
+        }
+
+        // Days Left Filters
+        if ($request->filled('expire_date_left')) {
+            $days = (int) $request->expire_date_left;
+            // Clients expiring within X days
+            $query->whereRaw('DATEDIFF(expire_date, NOW()) <= ?', [$days])
+                  ->where('expire_date', '>=', now());
+        }
+        if ($request->filled('billing_cycle_left')) {
+            $days = (int) $request->billing_cycle_left;
+            $query->whereRaw('DATEDIFF(billing_date, NOW()) <= ?', [$days])
+                  ->where('billing_date', '>=', now());
+        }
+        if ($request->filled('promise_date_left')) {
+            $days = (int) $request->promise_date_left;
+            $query->whereRaw('DATEDIFF(promise_date, NOW()) <= ?', [$days])
+                  ->where('promise_date', '>=', now());
+        }
 
         // Aggregates for header summary
         // Note: For simplicity, balance = monthly_fee - amount_paid (not fully implemented yet)
@@ -58,7 +91,7 @@ class ClientController extends Controller
     /**
      * Store a newly created client.
      */
-    public function store(Request $request)
+    public function store(Request $request, RouterOSService $routerData)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -109,6 +142,41 @@ class ClientController extends Controller
 
             DB::commit();
 
+            // --- Mikrotik Sync Start ---
+            if ($request->filled('server_id') && ($request->connection_type === 'pppoe' || $request->connection_type === 'PPPoE')) {
+                try {
+                    $router = MikrotikRouter::find($request->server_id);
+                    if ($router) {
+                        $decryptedPassword = Crypt::decryptString($router->password);
+                        if ($routerData->connect($router->ip_address, $router->username, $decryptedPassword, $router->port)) {
+                            
+                            // Check if secret exists to avoid error
+                            $exists = $routerData->comm('/ppp/secret/print', [
+                                '?name' => $client->username
+                            ]);
+
+                            if (empty($exists)) {
+                                $routerData->comm('/ppp/secret/add', [
+                                    'name' => $client->username,
+                                    'password' => $request->password,
+                                    'service' => 'pppoe',
+                                    'profile' => 'default', // Using default profile for now
+                                    'comment' => 'Added from ISP Billing: ' . $client->name . ' (' . $client->client_id_display . ')'
+                                ]);
+                            }
+
+                            $routerData->disconnect();
+                        } else {
+                            Log::error("Failed to connect to Mikrotik: " . $routerData->getError());
+                        }
+                    }
+                } catch (\Exception $ex) {
+                    Log::error("Mikrotik Sync Error: " . $ex->getMessage());
+                    // We do not fail the request if Mikrotik sync fails, but we assume it's "mostly" fine or will be synced later
+                }
+            }
+            // --- Mikrotik Sync End ---
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Customer created successfully',
@@ -135,7 +203,7 @@ class ClientController extends Controller
     /**
      * Update the specified client.
      */
-    public function update(Request $request, Client $client)
+    public function update(Request $request, Client $client, RouterOSService $routerData)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
@@ -144,6 +212,7 @@ class ClientController extends Controller
             'profile_pic' => 'nullable|image|max:2048',
             'nid_pic' => 'nullable|image|max:2048',
             'res_form_pic' => 'nullable|image|max:2048',
+            'status' => 'sometimes|in:active,inactive,expired,suspended',
         ]);
 
         if ($validator->fails()) {
@@ -178,6 +247,55 @@ class ClientController extends Controller
 
             DB::commit();
 
+            // --- Mikrotik Sync Start (Update) ---
+            if ($client->server_id && ($client->connection_type === 'pppoe' || $client->connection_type === 'PPPoE')) {
+                try {
+                    $router = MikrotikRouter::find($client->server_id);
+                    if ($router) {
+                        $decryptedPassword = Crypt::decryptString($router->password);
+                        if ($routerData->connect($router->ip_address, $router->username, $decryptedPassword, $router->port)) {
+                            
+                            // Find secret by ID or Name
+                            $secret = $routerData->comm('/ppp/secret/print', [
+                                '?name' => $client->username
+                            ]);
+
+                            if (!empty($secret)) {
+                                $secretId = $secret[0]['.id'];
+                                $updateData = [];
+
+                                // Update Password if changed
+                                if ($request->filled('password')) {
+                                    $updateData['password'] = $request->password;
+                                }
+
+                                // Update Status (Enable/Disable)
+                                // If status is passed in request, use it. Otherwise use client's current status.
+                                $currentStatus = $request->status ?? $client->status;
+                                
+                                if ($currentStatus === 'active') {
+                                    $routerData->comm('/ppp/secret/enable', ['.id' => $secretId]);
+                                } else {
+                                    $routerData->comm('/ppp/secret/disable', ['.id' => $secretId]);
+                                }
+
+                                if (!empty($updateData)) {
+                                    $updateData['.id'] = $secretId;
+                                    $routerData->comm('/ppp/secret/set', $updateData);
+                                }
+                            }
+
+                            $routerData->disconnect();
+                        } else {
+                            Log::error("Failed to connect to Mikrotik during update: " . $routerData->getError());
+                        }
+                    }
+                } catch (\Exception $ex) {
+                    Log::error("Mikrotik Sync Update Error: " . $ex->getMessage());
+                }
+            }
+            // --- Mikrotik Sync End ---
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Client updated successfully',
@@ -196,12 +314,45 @@ class ClientController extends Controller
     /**
      * Remove the specified client.
      */
-    public function destroy(Client $client)
+    public function destroy(Client $client, RouterOSService $routerData)
     {
-        $client->delete();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Client deleted successfully'
-        ]);
+        try {
+            // --- Mikrotik Sync Start (Delete) ---
+            if ($client->server_id && ($client->connection_type === 'pppoe' || $client->connection_type === 'PPPoE')) {
+                try {
+                    $router = MikrotikRouter::find($client->server_id);
+                    if ($router) {
+                        $decryptedPassword = Crypt::decryptString($router->password);
+                        if ($routerData->connect($router->ip_address, $router->username, $decryptedPassword, $router->port)) {
+                            
+                            $secret = $routerData->comm('/ppp/secret/print', [
+                                '?name' => $client->username
+                            ]);
+
+                            if (!empty($secret)) {
+                                $routerData->comm('/ppp/secret/remove', ['.id' => $secret[0]['.id']]);
+                            }
+
+                            $routerData->disconnect();
+                        }
+                    }
+                } catch (\Exception $ex) {
+                    Log::error("Mikrotik Sync Destroy Error: " . $ex->getMessage());
+                }
+            }
+            // --- Mikrotik Sync End ---
+
+            $client->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Client deleted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+             return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to delete client: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

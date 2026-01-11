@@ -216,36 +216,151 @@
       </div>
     </div>
 
-    <!-- Filter Modal (Simplified for now) -->
+    <!-- Filter Modal -->
     <div v-if="showFilterModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-       <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden">
-          <div class="bg-[#0f4340] px-6 py-3 text-white flex items-center justify-between">
+       <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col">
+          <div class="bg-[#0f4340] px-6 py-3 text-white flex items-center justify-between shrink-0">
              <span class="font-bold text-sm uppercase">Client Filter</span>
              <button @click="showFilterModal = false">
                 <svg class="w-5 h-5 text-white/70 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
              </button>
           </div>
-          <div class="p-6 grid grid-cols-2 gap-4">
+          <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 overflow-y-auto">
+             <!-- Row 1 -->
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Router</label>
+                <select v-model="filters.server_id" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                   <option value="">Select...</option>
+                   <option v-for="router in dropdowns.routers" :key="router.id" :value="router.id">{{ router.name }}</option>
+                </select>
+             </div>
              <div>
                 <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Zone</label>
-                <select v-model="filters.zone_id" class="w-full rounded-2xl border-transparent bg-[#f3f6f9] text-gray-700 text-[11px] py-1.5 px-4 outline-none">
-                   <option value="">All Zones</option>
+                <select v-model="filters.zone_id" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                   <option value="">Select...</option>
                    <option v-for="zone in dropdowns.zones" :key="zone.id" :value="zone.id">{{ zone.name }}</option>
                 </select>
              </div>
              <div>
-                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Status</label>
-                <select v-model="filters.status" class="w-full rounded-2xl border-transparent bg-[#f3f6f9] text-gray-700 text-[11px] py-1.5 px-4 outline-none">
-                   <option value="">All Status</option>
-                   <option value="active">Active</option>
-                   <option value="inactive">Inactive</option>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Sub Zone</label>
+                <select v-model="filters.sub_zone_id" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                   <option value="">Select...</option>
+                   <option v-for="sz in filteredSubZones" :key="sz.id" :value="sz.id">{{ sz.name }}</option>
                 </select>
              </div>
-             <!-- More filters can be added here -->
+
+             <!-- Row 2 -->
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Billing Cycle</label>
+                <div class="w-full">
+                    <VueDatePicker 
+                        v-model="billingCycleRange" 
+                        range 
+                        :enable-time-picker="false" 
+                        :auto-apply="true"
+                        placeholder="Select Date Range" 
+                        teleport="body" 
+                    />
+                </div>
+             </div>
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Box</label>
+                <select v-model="filters.box_id" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                   <option value="">Select...</option>
+                   <option v-for="box in filteredBoxes" :key="box.id" :value="box.id">{{ box.name }}</option>
+                </select>
+             </div>
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Packages</label>
+                <select v-model="filters.package_id" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                   <option value="">Select...</option>
+                   <option v-for="pkg in dropdowns.packages" :key="pkg.id" :value="pkg.id">{{ pkg.name }}</option>
+                </select>
+             </div>
+
+             <!-- Row 3 -->
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Expire Date</label>
+                <div class="w-full">
+                    <VueDatePicker 
+                        v-model="expireDateRange" 
+                        range 
+                        :enable-time-picker="false" 
+                        :auto-apply="true"
+                        placeholder="Select Date Range" 
+                        teleport="body" 
+                    />
+                </div>
+             </div>
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Billing Type</label>
+                <select v-model="filters.billing_type" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                   <option value="">Select...</option>
+                   <option value="monthly">Monthly</option>
+                   <option value="one_time">One Time</option>
+                </select>
+             </div>
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Client Type</label>
+                <select v-model="filters.client_type_id" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                   <option value="">Select...</option>
+                   <option v-for="ctype in dropdowns.client_types" :key="ctype.id" :value="ctype.id">{{ ctype.name }}</option>
+                   <!-- Fallback if no API -->
+                   <option v-if="dropdowns.client_types.length === 0" value="home">Home</option>
+                   <option v-if="dropdowns.client_types.length === 0" value="corporate">Corporate</option>
+                </select>
+             </div>
+
+             <!-- Row 4 -->
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Promise Date</label>
+                <div class="w-full">
+                    <VueDatePicker 
+                        v-model="promiseDateRange" 
+                        range 
+                        :enable-time-picker="false" 
+                        :auto-apply="true"
+                        placeholder="Select Date Range" 
+                        teleport="body" 
+                    />
+                </div>
+             </div>
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Payment Status</label>
+                <select v-model="filters.payment_status" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                   <option value="">Select...</option>
+                   <option value="paid">Paid</option>
+                   <option value="unpaid">Unpaid</option>
+                </select>
+             </div>
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Status</label>
+                <select v-model="filters.status" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                   <option value="">Select...</option>
+                   <option value="active">Active</option>
+                   <option value="inactive">Inactive</option>
+                   <option value="suspended">Suspended</option>
+                   <option value="expired">Expired</option>
+                </select>
+             </div>
+
+             <!-- Row 5 -->
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Expire Date Left</label>
+                <input type="number" v-model="filters.expire_date_left" placeholder="Expire Date Left" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+             </div>
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Billing Cycle Left</label>
+                <input type="number" v-model="filters.billing_cycle_left" placeholder="Billing Cycle Left" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+             </div>
+             <div>
+                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Promise Date Left</label>
+                <input type="number" v-model="filters.promise_date_left" placeholder="Promise Date Left" class="w-full rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs py-2 px-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+             </div>
           </div>
-          <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t border-gray-100">
-             <button @click="resetFilters" class="px-6 py-1.5 border border-gray-300 rounded-lg text-xs font-bold text-gray-500 hover:bg-white transition-colors uppercase">Reset</button>
-             <button @click="applyFilters" class="px-6 py-1.5 bg-[#0f4340] text-white rounded-lg text-xs font-bold hover:bg-[#0a2f2d] transition-colors uppercase">Submit</button>
+          <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t border-gray-100 shrink-0">
+             <button @click="resetFilters" class="px-6 py-2 border border-gray-300 rounded-lg text-xs font-bold text-gray-600 hover:bg-white transition-colors uppercase tracking-wide">Reset</button>
+             <button @click="applyFilters" class="px-6 py-2 bg-[#0f4340] text-white rounded-lg text-xs font-bold hover:bg-[#0a2f2d] transition-colors uppercase tracking-wide shadow-md">Submit</button>
           </div>
        </div>
     </div>
@@ -253,9 +368,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { VueDatePicker } from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 
 const clients = ref([]);
 const loading = ref(false);
@@ -268,8 +385,15 @@ const meta = ref({ current_page: 1, last_page: 1, total: 0, from: 0, to: 0 });
 
 const dropdowns = ref({
     zones: [],
-    packages: []
+    sub_zones: [],
+    boxes: [],
+    packages: [],
+    routers: [],
+    client_types: [],
 });
+
+const filteredSubZones = ref([]);
+const filteredBoxes = ref([]);
 
 const columns = ref([
     { key: 'select', label: 'Select', visible: true },
@@ -284,15 +408,39 @@ const columns = ref([
     { key: 'actions', label: 'Actions', visible: true },
 ]);
 
+// Updated Filters Object matching the requirement
 const filters = ref({
-    search: '',
+    server_id: '',
+    zone_id: '',
+    sub_zone_id: '',
+    box_id: '',
+    package_id: '',
+    billing_type: '',
+    client_type_id: '', // Assuming mapped to client_type
     status: '',
     payment_status: '',
-    zone_id: '',
-    package_id: '',
+    
+    // Date Ranges & Inputs (Backend expects these)
+    billing_cycle_start: '',
+    billing_cycle_end: '',
+    expire_date_start: '',
+    expire_date_end: '',
+    promise_date_start: '',
+    promise_date_end: '',
+    
+    expire_date_left: '',
+    billing_cycle_left: '',
+    promise_date_left: '',
+
+    search: '',
     page: 1,
     per_page: 50
 });
+
+// UI refs for DatePickers
+const billingCycleRange = ref();
+const expireDateRange = ref();
+const promiseDateRange = ref();
 
 const fetchClients = async () => {
     loading.value = true;
@@ -316,16 +464,46 @@ const fetchClients = async () => {
 
 const fetchDropdowns = async () => {
     try {
-        const [zonesRes, pkgsRes] = await Promise.all([
+        // Fetch all necessary dropdowns
+        const [zonesRes, subZonesRes, boxesRes, pkgsRes, routersRes, clientTypesRes] = await Promise.all([
             axios.get('/api/config/zones', { params: { no_paginate: true } }),
-            axios.get('/api/config/packages', { params: { no_paginate: true } })
+            axios.get('/api/config/sub-zones', { params: { no_paginate: true } }),
+            axios.get('/api/config/boxes', { params: { no_paginate: true } }),
+            axios.get('/api/config/packages', { params: { no_paginate: true } }),
+            axios.get('/api/config/mikrotik-routers', { params: { no_paginate: true } }),
+            axios.get('/api/config/client-types', { params: { no_paginate: true } }),
         ]);
+
         dropdowns.value.zones = zonesRes.data;
+        dropdowns.value.sub_zones = subZonesRes.data;
+        dropdowns.value.boxes = boxesRes.data;
         dropdowns.value.packages = pkgsRes.data;
+        dropdowns.value.routers = routersRes.data;
+        dropdowns.value.client_types = clientTypesRes.data;
     } catch (e) {
         console.error("Failed to fetch dropdowns", e);
     }
 }
+
+// Watchers for cascading dropdowns
+watch(() => filters.value.zone_id, (newVal) => {
+    if (newVal) {
+        filteredSubZones.value = dropdowns.value.sub_zones.filter(sz => sz.zone_id == newVal);
+    } else {
+        filteredSubZones.value = [];
+    }
+    // filters.value.sub_zone_id = ''; // Optional: clear subzone when zone changes
+});
+
+watch(() => filters.value.sub_zone_id, (newVal) => {
+    if (newVal) {
+        filteredBoxes.value = dropdowns.value.boxes.filter(b => b.sub_zone_id == newVal);
+    } else {
+        filteredBoxes.value = [];
+    }
+    // filters.value.box_id = '';
+});
+
 
 const handleSearch = (() => {
     let timeout;
@@ -352,7 +530,7 @@ const toggleStatus = async (client) => {
     try {
         await axios.put(`/api/config/clients/${client.id}`, { 
             status: newStatus,
-            _method: 'PUT' // FormData spoofing if needed, but here simple JSON should work
+            _method: 'PUT'
         });
         client.status = newStatus;
         Swal.fire({
@@ -370,21 +548,66 @@ const toggleStatus = async (client) => {
 };
 
 const applyFilters = () => {
+    // Process Date Ranges
+    if (billingCycleRange.value && billingCycleRange.value.length === 2) {
+        filters.value.billing_cycle_start = formatDateForApi(billingCycleRange.value[0]);
+        filters.value.billing_cycle_end = formatDateForApi(billingCycleRange.value[1]);
+    } else {
+         filters.value.billing_cycle_start = '';
+         filters.value.billing_cycle_end = '';
+    }
+
+    if (expireDateRange.value && expireDateRange.value.length === 2) {
+        filters.value.expire_date_start = formatDateForApi(expireDateRange.value[0]);
+        filters.value.expire_date_end = formatDateForApi(expireDateRange.value[1]);
+    } else {
+        filters.value.expire_date_start = '';
+        filters.value.expire_date_end = '';
+    }
+
+    if (promiseDateRange.value && promiseDateRange.value.length === 2) {
+        filters.value.promise_date_start = formatDateForApi(promiseDateRange.value[0]);
+        filters.value.promise_date_end = formatDateForApi(promiseDateRange.value[1]);
+    } else {
+         filters.value.promise_date_start = '';
+         filters.value.promise_date_end = '';
+    }
+
     filters.value.page = 1;
     fetchClients();
     showFilterModal.value = false;
 };
 
 const resetFilters = () => {
-    filters.value = {
-        search: '',
+    const defaultFilters = {
+        server_id: '',
+        zone_id: '',
+        sub_zone_id: '',
+        box_id: '',
+        package_id: '',
+        billing_type: '',
+        client_type_id: '',
         status: '',
         payment_status: '',
-        zone_id: '',
-        package_id: '',
+        billing_cycle_start: '',
+        billing_cycle_end: '',
+        expire_date_start: '',
+        expire_date_end: '',
+        promise_date_start: '',
+        promise_date_end: '',
+        expire_date_left: '',
+        billing_cycle_left: '',
+        promise_date_left: '',
+        search: '',
         page: 1,
         per_page: 50
     };
+    filters.value = defaultFilters;
+    // Reset UI Date pickers
+    billingCycleRange.value = null;
+    expireDateRange.value = null;
+    promiseDateRange.value = null;
+    
     fetchClients();
 }
 
@@ -412,6 +635,20 @@ const formatDate = (dateStr) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Helper to format Date object to YYYY-MM-DD
+const formatDateForApi = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
 }
 
 const exportCSV = () => {
@@ -453,5 +690,12 @@ thead th {
   position: sticky;
   top: 0;
   z-index: 10;
+}
+/* Datepicker Override */
+.dp__theme_light {
+   --dp-primary-color: #10b981; /* Emerald 500 */
+   --dp-border-radius: 8px; 
+   --dp-input-padding: 8px 12px;
+   --dp-font-size: 11px;
 }
 </style>

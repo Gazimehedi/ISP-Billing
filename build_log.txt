@@ -1,0 +1,29 @@
+
+> build
+> vite build
+
+vite v5.4.21 building for production...
+transforming...
+resources/js/pages/client/ClientList.vue (171:7): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+✓ 455 modules transformed.
+x Build failed in 11.04s
+error during build:
+resources/js/pages/client/ClientList.vue (171:7): "default" is not exported by "node_modules/@vuepic/vue-datepicker/dist/vue-datepicker.js", imported by "resources/js/pages/client/ClientList.vue".
+file: /media/WEBDEV/LARAVEL-10/ISP-Billing/resources/js/pages/client/ClientList.vue:171:7
+
+169: import axios from 'axios';
+170: import Swal from 'sweetalert2';
+171: import VueDatePicker from '@vuepic/vue-datepicker';
+            ^
+172: import '@vuepic/vue-datepicker/dist/main.css';
+
+    at getRollupError (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at Module.error (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/node-entry.js:17022:16)
+    at Module.traceVariable (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/node-entry.js:17478:29)
+    at ModuleScope.findVariable (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/node-entry.js:15141:39)
+    at ChildScope.findVariable (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/node-entry.js:5688:38)
+    at FunctionScope.findVariable (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/node-entry.js:5688:38)
+    at FunctionBodyScope.findVariable (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/node-entry.js:5688:38)
+    at ReturnValueScope.findVariable (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/node-entry.js:5688:38)
+    at FunctionBodyScope.findVariable (file:///media/WEBDEV/LARAVEL-10/ISP-Billing/node_modules/rollup/dist/es/shared/node-entry.js:5688:38)

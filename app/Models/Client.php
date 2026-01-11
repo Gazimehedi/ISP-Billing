@@ -15,9 +15,9 @@ class Client extends Model
         'username', 'password', 'package_alias', 'connection_type', 'remote_address', 'mac_address',
         'name', 'client_id_display', 'mobile', 'email', 'phone', 'nid', 'res_form_no',
         'flat', 'house_no', 'road_no', 'address', 'permanent_address', 'lat', 'long',
-        'billing_type', 'payment_status', 'status', 'subscription_type',
+        'billing_type', 'payment_status', 'status', 'subscription_type', 'client_type_id',
         'monthly_fee', 'monthly_fee_due', 'connection_fee', 'balance',
-        'expire_date', 'connection_date', 'billing_date', 'joining_date', 'dob',
+        'expire_date', 'connection_date', 'billing_date', 'joining_date', 'dob', 'promise_date',
         'occupation', 'gender', 'father_name', 'mother_name',
         'facebook_url', 'linkedin_url', 'twitter_url', 'district', 'upazila',
         'is_same_address', 'server_id', 'protocol_type', 'cable_meter', 'fiber_code',
@@ -33,6 +33,7 @@ class Client extends Model
         'billing_date' => 'date',
         'joining_date' => 'date',
         'dob' => 'date',
+        'promise_date' => 'date',
         'device_purchase_date' => 'date',
         'is_vip' => 'boolean',
         'is_auto_disable' => 'boolean',
@@ -78,5 +79,10 @@ class Client extends Model
     public function server()
     {
         return $this->belongsTo(MikrotikRouter::class, 'server_id');
+    }
+
+    public function clientType()
+    {
+        return $this->belongsTo(ClientType::class);
     }
 }

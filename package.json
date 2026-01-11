@@ -12,6 +12,7 @@
         "vite": "^5.0.0"
     },
     "dependencies": {
+        "@vuepic/vue-datepicker": "^12.1.0",
         "apexcharts": "^5.3.6",
         "autoprefixer": "^10.4.23",
         "chart.js": "^4.5.1",
