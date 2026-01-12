@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('bandwidth_allocation')->nullable(); // e.g., "10 Mbps"
             $table->decimal('price', 10, 2);
+            $table->string('speed')->nullable();
             $table->string('type')->default('monthly'); // monthly, one_time
+            $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -51,6 +51,11 @@ const routes = [
                 component: () => import('../pages/config/Box.vue'),
             },
             {
+                path: 'configuration/package',
+                name: 'Package',
+                component: () => import('../pages/config/PackageList.vue'),
+            },
+            {
                 path: 'configuration/client-type',
                 name: 'ClientType',
                 component: () => import('../pages/config/ClientType.vue'),

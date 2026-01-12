@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\MikrotikRouter;
+use App\Models\Package;
 use App\Services\RouterOSService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -107,6 +108,7 @@ class ClientController extends Controller
             'profile_pic' => 'nullable|image|max:2048',
             'nid_pic' => 'nullable|image|max:2048',
             'res_form_pic' => 'nullable|image|max:2048',
+            'employee_id' => 'nullable|exists:employees,id',
         ]);
 
         if ($validator->fails()) {
@@ -143,12 +145,16 @@ class ClientController extends Controller
             DB::commit();
 
             // --- Mikrotik Sync Start ---
-            if ($request->filled('server_id') && ($request->connection_type === 'pppoe' || $request->connection_type === 'PPPoE')) {
+            if ($client->server_id && ($client->connection_type === 'pppoe' || $client->connection_type === 'PPPoE')) {
                 try {
-                    $router = MikrotikRouter::find($request->server_id);
+                    $router = MikrotikRouter::find($client->server_id);
                     if ($router) {
                         $decryptedPassword = Crypt::decryptString($router->password);
                         if ($routerData->connect($router->ip_address, $router->username, $decryptedPassword, $router->port)) {
+                            
+                            // Get package to use as profile
+                            $package = Package::find($client->package_id);
+                            $profileName = $package ? $package->name : 'default';
                             
                             // Check if secret exists to avoid error
                             $exists = $routerData->comm('/ppp/secret/print', [
@@ -156,13 +162,20 @@ class ClientController extends Controller
                             ]);
 
                             if (empty($exists)) {
-                                $routerData->comm('/ppp/secret/add', [
+                                $params = [
                                     'name' => $client->username,
                                     'password' => $request->password,
                                     'service' => 'pppoe',
-                                    'profile' => 'default', // Using default profile for now
+                                    'profile' => $profileName,
                                     'comment' => 'Added from ISP Billing: ' . $client->name . ' (' . $client->client_id_display . ')'
-                                ]);
+                                ];
+
+                                // Add remote-address if exists
+                                if ($client->remote_address) {
+                                    $params['remote-address'] = $client->remote_address;
+                                }
+
+                                $routerData->comm('/ppp/secret/add', $params);
                             }
 
                             $routerData->disconnect();
@@ -176,7 +189,6 @@ class ClientController extends Controller
                 }
             }
             // --- Mikrotik Sync End ---
-
             return response()->json([
                 'status' => 'success',
                 'message' => 'Customer created successfully',
@@ -248,6 +260,7 @@ class ClientController extends Controller
             DB::commit();
 
             // --- Mikrotik Sync Start (Update) ---
+            // --- Mikrotik Sync Start (Update) ---
             if ($client->server_id && ($client->connection_type === 'pppoe' || $client->connection_type === 'PPPoE')) {
                 try {
                     $router = MikrotikRouter::find($client->server_id);
@@ -267,6 +280,19 @@ class ClientController extends Controller
                                 // Update Password if changed
                                 if ($request->filled('password')) {
                                     $updateData['password'] = $request->password;
+                                }
+
+                                // Update Profile if package changed
+                                if ($request->filled('package_id')) {
+                                    $package = Package::find($request->package_id);
+                                    if ($package) {
+                                        $updateData['profile'] = $package->name;
+                                    }
+                                }
+
+                                // Update remote-address
+                                if ($request->filled('remote_address')) {
+                                    $updateData['remote-address'] = $request->remote_address;
                                 }
 
                                 // Update Status (Enable/Disable)

@@ -293,9 +293,7 @@
                             <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">CONNECTION TYPE <span class="text-red-500 font-bold">✱</span></label>
                             <select v-model="form.connection_type" class="select-pill-light" required>
                                 <option value="">Select</option>
-                                <option v-for="type in dropdowns.connection_types" :key="type.id" :value="type.id">{{ type.name }}</option>
-                                <option v-if="dropdowns.connection_types.length === 0" value="pppoe">PPPoE</option>
-                                <option v-if="dropdowns.connection_types.length === 0" value="static">Static IP</option>
+                                <option v-for="type in dropdowns.connection_types" :key="type.id" :value="type.name">{{ type.name }}</option>
                             </select>
                         </div>
                     </div>
@@ -455,7 +453,7 @@
                                 <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">CONNECTED BY <span class="text-sky-400 cursor-help" title="Select Employee">ℹ</span></label>
                                 <select v-model="form.employee_id" class="select-pill-light">
                                     <option value="">Select Employee</option>
-                                    <option v-for="emp in dropdowns.employees" :key="emp" :value="emp">{{ emp }}</option>
+                                    <option v-for="emp in dropdowns.employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
                                 </select>
                              </div>
                         </div>
@@ -513,7 +511,7 @@ const dropdowns = ref({
     upazilas: ['Badda', 'Gulshan', 'Uttara', 'Mirpur', 'Dhanmondi', 'Mohammadpur', 'Rampura', 'Motijheel'],
     devices: ['ONU - HG8245H', 'ONU - ZTE F660', 'ONU - VSOLE', 'Router - TP-Link C6', 'Router - Tenda F3', 'Switch - Cisco 2960'],
     vendors: ['Huawei', 'ZTE', 'TP-Link', 'Tenda', 'Cisco', 'MikroTik', 'VSOLE'],
-    employees: ['Admin User', 'Technician Area 1', 'Support Lead', 'Field Staff B'],
+    employees: [],
     affiliators: ['Direct Sales', 'Partner A', 'Referral Network'],
     servers: [],
     service_profiles: [],
@@ -609,13 +607,14 @@ watch(() => form.value.address, (val) => {
 
 const loadData = async () => {
     try {
-        const [pkgRes, zoneRes, serverRes, profileRes, typeRes, connRes] = await Promise.all([
+        const [pkgRes, zoneRes, serverRes, profileRes, typeRes, connRes, employeeRes] = await Promise.all([
             axios.get('/api/config/packages?no_paginate=true'),
             axios.get('/api/config/zones?no_paginate=true'),
             axios.get('/api/config/mikrotik-routers?no_paginate=true'),
             axios.get('/api/config/service-profiles?no_paginate=true'),
             axios.get('/api/config/client-types?no_paginate=true'),
-            axios.get('/api/config/connection-types?no_paginate=true')
+            axios.get('/api/config/connection-types?no_paginate=true'),
+            axios.get('/api/config/employees?no_paginate=true')
         ]);
         packages.value = pkgRes.data;
         zones.value = zoneRes.data;
@@ -623,6 +622,7 @@ const loadData = async () => {
         dropdowns.value.service_profiles = profileRes.data;
         dropdowns.value.client_types = typeRes.data;
         dropdowns.value.connection_types = connRes.data;
+        dropdowns.value.employees = employeeRes.data;
     } catch (error) {
         console.error('Failed to load dropdown data', error);
     }

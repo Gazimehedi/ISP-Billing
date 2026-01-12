@@ -52,7 +52,11 @@ class RouterOSService
             $query = new Query($command);
             
             foreach ($params as $key => $value) {
-                $query->equal($key, $value);
+                if (strpos($key, '?') === 0) {
+                    $query->where(substr($key, 1), $value);
+                } else {
+                    $query->equal($key, $value);
+                }
             }
             
             return $this->client->query($query)->read();

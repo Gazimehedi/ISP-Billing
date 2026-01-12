@@ -90,6 +90,7 @@ const menuGroups = ref([
       { label: 'Zone', to: '/configuration/zone' },
       { label: 'Sub Zone', to: '/configuration/sub-zone' },
       { label: 'Box', to: '/configuration/box' },
+      { label: 'Package', to: '/configuration/package' },
       { label: 'Client Type', to: '/configuration/client-type' },
       { label: 'Connection Type', to: '/configuration/connection-type' }
     ]

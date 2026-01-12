@@ -35,7 +35,9 @@ class EmployeeController extends Controller
             'total_salary' => Employee::sum('salary'),
             'total_due' => Employee::sum('due'),
         ];
-
+        if ($request->has('no_paginate')) {
+            return response()->json($query->get());
+        }
         $employees = $query->latest()->paginate($request->per_page ?? 10);
 
         return response()->json([
