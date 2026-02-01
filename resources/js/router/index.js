@@ -65,6 +65,19 @@ const routes = [
                 name: 'ConnectionType',
                 component: () => import('../pages/config/ConnectionType.vue'),
             },
+
+            // Billing Module
+            {
+                path: 'billing/list',
+                name: 'BillingList',
+                component: () => import('../pages/billing/BillingList.vue'),
+            },
+            {
+                path: 'billing/daily-collection',
+                name: 'DailyCollection',
+                component: () => import('../pages/billing/DailyCollection.vue'),
+            },
+
             {
                 path: 'olt/list',
                 name: 'OltList',

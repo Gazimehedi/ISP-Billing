@@ -85,4 +85,9 @@ class Client extends Model
     {
         return $this->belongsTo(ClientType::class);
     }
+
+    public function billings()
+    {
+        return $this->hasMany(Billing::class);
+    }
 }

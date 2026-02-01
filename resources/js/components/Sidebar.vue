@@ -106,6 +106,14 @@ const menuGroups = ref([
     ]
   },
   {
+    label: 'Billing',
+    icon: 'BillingIcon', // You might need to add this icon or use a generic one
+    items: [
+      { label: 'Billing List', to: '/billing/list' },
+      { label: 'Daily Bill Collection', to: '/billing/daily-collection' }
+    ]
+  },
+  {
     label: 'Client',
     icon: 'ClientIcon',
     items: [

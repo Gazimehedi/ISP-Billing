@@ -163,4 +163,14 @@ class MikrotikRouterController extends Controller
             'message' => 'Connection failed: ' . $service->getError()
         ], 400);
     }
+
+
+    /**
+     * Sync data from all routers.
+     */
+    public function sync(Request $request)
+    {
+        // Mock sync process
+        return response()->json(['message' => 'Sync started successfully']);
+    }
 }

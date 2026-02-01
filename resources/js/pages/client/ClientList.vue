@@ -134,8 +134,8 @@
               </td>
               <td v-if="isColVisible('bill')" class="px-4 py-3 leading-tight">
                 <div><span class="text-gray-400">Bill:</span> <span class="text-gray-700 font-bold">{{ client.monthly_fee }}</span></div>
-                <div><span class="text-gray-400">Balance:</span> <span class="text-emerald-500 font-bold">{{ client.monthly_fee_due }}</span></div>
-                <div><span class="text-gray-400">Due:</span> <span class="text-red-500 font-bold">0</span></div>
+                <div><span class="text-gray-400">Balance:</span> <span class="text-emerald-500 font-bold">{{ client.balance || '0.00' }}</span></div>
+                <div><span class="text-gray-400">Due:</span> <span class="text-red-500 font-bold">{{ client.monthly_fee_due || '0.00' }}</span></div>
               </td>
               <td v-if="isColVisible('all_date')" class="px-4 py-3">
                 <div class="text-gray-600 font-medium">{{ formatDate(client.joining_date) }}</div>

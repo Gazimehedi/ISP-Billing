@@ -75,10 +75,33 @@ Route::prefix('config')->group(function () {
     // Connection Type
     Route::apiResource('connection-types', App\Http\Controllers\Api\Config\ConnectionTypeController::class);
 
-    // Monitoring
-    Route::get('monitoring/summary', [App\Http\Controllers\Api\Config\MonitoringController::class, 'getSummary']);
-    Route::post('monitoring/sync-signals', [App\Http\Controllers\Api\Config\MonitoringController::class, 'syncSignals']);
-    Route::get('monitoring/signal-trends/{oltUserId}', [App\Http\Controllers\Api\Config\MonitoringController::class, 'getSignalTrends']);
     Route::get('monitoring/alerts', [App\Http\Controllers\Api\Config\MonitoringController::class, 'getAlerts']);
     Route::post('monitoring/alerts/{alertId}/resolve', [App\Http\Controllers\Api\Config\MonitoringController::class, 'resolveAlert']);
 });
+
+// Billing
+Route::get('billing/list', [\App\Http\Controllers\Api\Finance\BillingController::class, 'index']);
+Route::post('billing/bulk-status', [\App\Http\Controllers\Api\Finance\BillingController::class, 'bulkStatus']);
+Route::post('billing/bulk-zone', [\App\Http\Controllers\Api\Finance\BillingController::class, 'bulkZone']);
+Route::post('billing/bulk-extend', [\App\Http\Controllers\Api\Finance\BillingController::class, 'bulkExtend']);
+Route::get('billing/export/excel', [\App\Http\Controllers\Api\Finance\BillingController::class, 'exportExcel']);
+Route::get('billing/invoices/bulk', [\App\Http\Controllers\Api\Finance\BillingController::class, 'downloadBulkInvoice']);
+Route::get('billing/export/pdf', [\App\Http\Controllers\Api\Finance\BillingController::class, 'exportPdf']);
+
+Route::post('communication/sms/bulk', [\App\Http\Controllers\Api\Finance\BillingController::class, 'sendBulkSms']);
+Route::post('communication/email/bulk', [\App\Http\Controllers\Api\Finance\BillingController::class, 'sendBulkEmail']);
+
+Route::post('mikrotik/sync', [\App\Http\Controllers\Api\Config\MikrotikRouterController::class, 'sync']);
+
+// Daily Collection
+Route::get('billing/daily-collections', [\App\Http\Controllers\Api\Finance\DailyCollectionController::class, 'index']);
+Route::post('billing/daily-collections', [\App\Http\Controllers\Api\Finance\DailyCollectionController::class, 'store']);
+Route::post('billing/daily-collections/approve', [\App\Http\Controllers\Api\Finance\DailyCollectionController::class, 'approveBulk']);
+Route::post('billing/daily-collections/delete', [\App\Http\Controllers\Api\Finance\DailyCollectionController::class, 'deleteBulk']);
+Route::get('billing/daily-collections/export', [\App\Http\Controllers\Api\Finance\DailyCollectionController::class, 'export']);
+Route::get('billing/daily-collections/search-client', [\App\Http\Controllers\Api\Finance\DailyCollectionController::class, 'searchClient']);
+
+// Webhook Payments
+Route::get('billing/webhook-payments', [\App\Http\Controllers\Api\Finance\WebhookPaymentController::class, 'index']);
+Route::get('billing/webhook-payments/export', [\App\Http\Controllers\Api\Finance\WebhookPaymentController::class, 'export']);
+Route::get('billing/webhook-payments/{id}', [\App\Http\Controllers\Api\Finance\WebhookPaymentController::class, 'show']);
