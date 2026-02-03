@@ -381,4 +381,72 @@ class ClientController extends Controller
             ], 500);
         }
     }
+    /**
+     * Get billing history for the client.
+     */
+    public function billingHistory(Client $client)
+    {
+        // 1. Invoices
+        $invoices = \App\Models\Billing::where('client_id', $client->id)
+            ->get()
+            ->map(function ($item) {
+                $date = $item->generated_date ? $item->generated_date : $item->created_at;
+                return [
+                    'id' => $item->id,
+                    'date' => \Carbon\Carbon::parse($date)->format('Y-m-d'),
+                    'type' => 'invoice',
+                    'amount' => $item->amount,
+                    'status' => $item->status, // paid, unpaid, partial
+                    'description' => 'Invoice #' . $item->invoice_no,
+                    'transaction_id' => $item->invoice_no
+                ];
+            });
+
+        // 2. Manual Payments
+        $manualPayments = \App\Models\Payment::where('client_id', $client->id)
+            ->get()
+            ->map(function ($item) {
+                $date = $item->date ? $item->date : $item->created_at;
+                return [
+                    'id' => $item->id,
+                    'date' => \Carbon\Carbon::parse($date)->format('Y-m-d'),
+                    'type' => 'payment',
+                    'amount' => $item->amount,
+                    'status' => $item->status,
+                    'description' => 'Manual Payment (' . $item->method . ')',
+                    'transaction_id' => $item->transaction_id
+                ];
+            });
+
+        // 3. Webhook Payments (Online)
+        $onlinePayments = \App\Models\WebhookPayment::where('client_id', $client->id)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'date' => \Carbon\Carbon::parse($item->created_at)->format('Y-m-d'),
+                    'type' => 'payment_gateway',
+                    'amount' => $item->amount,
+                    'status' => $item->status, // success, failure
+                    'description' => 'Online Payment (' . $item->payment_method . ')',
+                    'transaction_id' => $item->transaction_id
+                ];
+            });
+
+        // Merge and Sort
+        $history = $invoices->concat($manualPayments)->concat($onlinePayments)->sortByDesc('date')->values();
+
+        return response()->json([
+            'client_summary' => [
+                'id' => $client->id,
+                'display_id' => $client->client_id_display,
+                'monthly_fee' => $client->monthly_fee,
+                'balance' => $client->balance,
+                'due' => $client->monthly_fee_due,
+                'last_payment' => $client->last_payment_date ? \Carbon\Carbon::parse($client->last_payment_date)->format('Y-m-d') : null,
+                'status' => $client->status
+            ],
+            'history' => $history
+        ]);
+    }
 }

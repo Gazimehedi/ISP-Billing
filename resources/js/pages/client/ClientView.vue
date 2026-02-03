@@ -208,6 +208,11 @@
                             </div>
                         </div>
                     </div>
+
+                   <!-- Billing History Tab -->
+                   <div v-show="activeTab === 'billing'">
+                        <ClientBillingHistory :client-id="client.id" />
+                   </div>
                 </div>
             </div>
         </div>
@@ -231,6 +236,7 @@ import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import SignalTrendChart from '../../components/SignalTrendChart.vue';
+import ClientBillingHistory from '../../components/ClientBillingHistory.vue';
 
 const route = useRoute();
 const router = useRouter();

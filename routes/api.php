@@ -56,6 +56,7 @@ Route::prefix('config')->group(function () {
     Route::apiResource('zones', ZoneController::class);
 
     // Client Management
+    Route::get('clients/{client}/billing-history', [App\Http\Controllers\Api\Client\ClientController::class, 'billingHistory']);
     Route::apiResource('clients', App\Http\Controllers\Api\Client\ClientController::class);
     Route::apiResource('packages', App\Http\Controllers\Api\Client\PackageController::class); // Need to create PackageController briefly or just use a simple one
 

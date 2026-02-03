@@ -156,7 +156,7 @@
               </td>
               <td v-if="isColVisible('actions')" class="px-4 py-3 text-center">
                 <div class="flex items-center justify-center gap-2">
-                   <button @click="Swal.fire('Info', 'Billing details coming soon', 'info')" class="p-1.5 text-sky-500 hover:bg-sky-50 rounded-md transition-colors border border-sky-100" title="Billing History">
+                   <button @click="openBillingModal(client)" class="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-md transition-colors border border-indigo-100" title="Billing Details">
                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                    </button>
                    <!-- Interactive Toggle Button -->
@@ -364,6 +364,14 @@
           </div>
        </div>
     </div>
+    <!-- Billing History Modal -->
+    <ClientBillingModal 
+        :is-open="showBillingModal" 
+        :client-id="selectedClientForBilling?.id"
+        :client-name="selectedClientForBilling?.name"
+        :client-code="selectedClientForBilling?.client_id_display"
+        @close="showBillingModal = false" 
+    />
   </div>
 </template>
 
@@ -371,12 +379,15 @@
 import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import ClientBillingModal from '../../components/ClientBillingModal.vue';
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 
 const clients = ref([]);
 const loading = ref(false);
 const showFilterModal = ref(false);
+const showBillingModal = ref(false);
+const selectedClientForBilling = ref(null);
 const showVisibilityMenu = ref(false);
 const selectedClients = ref([]);
 const activeAction = ref(null);
@@ -671,6 +682,11 @@ const exportCSV = () => {
     a.href = url;
     a.download = `clients_export_${new Date().getTime()}.csv`;
     a.click();
+};
+
+const openBillingModal = (client) => {
+    selectedClientForBilling.value = client;
+    showBillingModal.value = true;
 };
 
 onMounted(() => {
