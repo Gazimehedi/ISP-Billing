@@ -105,3 +105,12 @@ Route::get('billing/daily-collections/search-client', [\App\Http\Controllers\Api
 Route::get('billing/webhook-payments', [\App\Http\Controllers\Api\Finance\WebhookPaymentController::class, 'index']);
 Route::get('billing/webhook-payments/export', [\App\Http\Controllers\Api\Finance\WebhookPaymentController::class, 'export']);
 Route::get('billing/webhook-payments/{id}', [\App\Http\Controllers\Api\Finance\WebhookPaymentController::class, 'show']);
+
+// Payment Webhook Receivers
+Route::post('webhook/bkash', [\App\Http\Controllers\Api\Finance\BkashWebhookController::class, 'handle']);
+
+// Payment Gateway (No Auth Required)
+Route::get('payment/callback', [\App\Http\Controllers\Api\BkashPaymentController::class, 'callback']);
+Route::get('payment/{clientCode}', [\App\Http\Controllers\Api\BkashPaymentController::class, 'getClientDetails']);
+Route::post('payment/initiate', [\App\Http\Controllers\Api\BkashPaymentController::class, 'initiatePayment']);
+Route::post('payment/execute', [\App\Http\Controllers\Api\BkashPaymentController::class, 'executePayment']);

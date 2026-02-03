@@ -22,6 +22,11 @@ const routes = [
         component: Register,
     },
     {
+        path: '/pay/:clientCode',
+        name: 'PaymentGateway',
+        component: () => import('../pages/PaymentGateway.vue'),
+    },
+    {
         path: '/',
         component: DashboardLayout,
         children: [
@@ -144,7 +149,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const isAuth = localStorage.getItem('is_auth') === 'true';
     const publicPages = ['/login', '/forgot-password', '/register'];
-    const authRequired = !publicPages.includes(to.path);
+    const isPaymentPage = to.path.startsWith('/pay/');
+    const authRequired = !publicPages.includes(to.path) && !isPaymentPage;
 
     if (authRequired && !isAuth) {
         return next('/login');

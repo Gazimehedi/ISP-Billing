@@ -25,6 +25,11 @@ Route::get('/user', [AuthController::class, 'user']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/register', [AuthController::class, 'register']);
 
+// Public Payment Gateway
+Route::get('/pay/{clientCode}', function () {
+    return view('welcome');
+})->where('clientCode', '[A-Z]+-[0-9]+');
+
 Route::get('/{any}', function () {
     return view('welcome');
 })->where('any', '.*');
