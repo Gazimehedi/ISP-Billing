@@ -23,6 +23,15 @@ class User extends Authenticatable
         'mobile',
         'password',
         'role',
+        'nid_number',
+        'division_id',
+        'district_id',
+        'thana_id',
+        'address',
+        'company_name',
+        'profile_pic',
+        'nid_front',
+        'nid_back'
     ];
 
     /**
@@ -44,4 +53,19 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function division()
+    {
+        return $this->belongsTo(Division::class);
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class);
+    }
+
+    public function thana()
+    {
+        return $this->belongsTo(Thana::class);
+    }
 }

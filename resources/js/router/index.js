@@ -134,6 +134,16 @@ const routes = [
                 component: () => import('../pages/employee/RoleList.vue'),
             },
             {
+                path: 'profiles/editprofile',
+                name: 'EditProfile',
+                component: () => import('../pages/profile/EditProfile.vue'),
+            },
+            {
+                path: 'profiles/viewprofile',
+                name: 'ViewProfile',
+                component: () => import('../pages/profile/ViewProfile.vue'),
+            },
+            {
                 path: '',
                 redirect: '/dashboard'
             }

@@ -4,8 +4,9 @@
       @click="isOpen = !isOpen"
       class="flex items-center space-x-2 focus:outline-none group"
     >
-      <div class="h-8 w-8 bg-[#f44336] rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm group-hover:shadow transition-shadow">
-        SI
+      <div class="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm group-hover:shadow transition-shadow overflow-hidden bg-[#f44336]">
+        <img v-if="user?.profile_pic_url" :src="user.profile_pic_url" class="w-full h-full object-cover">
+        <span v-else>{{ user?.company_name ? user.company_name.substring(0,2).toUpperCase() : 'SI' }}</span>
       </div>
       <svg 
         class="h-3 w-3 text-gray-400 group-hover:text-gray-600 transition-colors" 
@@ -23,19 +24,19 @@
     >
       <div class="px-4 py-3 border-b border-gray-100">
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">MERCHANT</p>
-        <p class="text-xs font-bold text-gray-700 mt-0.5">Silicon ISP</p>
+        <p class="text-xs font-bold text-gray-700 mt-0.5">{{ user?.company_name || 'Silicon ISP' }}</p>
       </div>
 
       <div class="py-1">
         <a href="#" class="flex items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
           <span class="mr-3 text-gray-400">👤</span> Profile
         </a>
-        <a href="#" class="flex items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
-          <span class="mr-3 text-gray-400">📄</span> View Profile
-        </a>
-        <a href="#" class="flex items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-50 pb-3">
+        <router-link :to="{ name: 'ViewProfile' }" class="flex items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+           <span class="mr-3 text-gray-400">📄</span> View Profile
+         </router-link>
+        <router-link :to="{ name: 'EditProfile' }" class="flex items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-50 pb-3">
           <span class="mr-3 text-gray-400">✏️</span> Edit Profile
-        </a>
+        </router-link>
       </div>
 
       <div class="py-1">
@@ -57,12 +58,26 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const isOpen = ref(false);
 const router = useRouter();
+const user = ref(null);
+const axios = window.axios;
+
+const fetchUser = async () => {
+    try {
+        const res = await (window.axios ? window.axios.get('/api/user') : (await axios).get('/api/user'));
+        user.value = res.data;
+    } catch (e) {
+        console.error("Profile dropdown user fetch failed", e);
+    }
+};
+
+onMounted(() => {
+    fetchUser();
+});
 
 const handleLogout = async () => {
     try {

@@ -22,11 +22,6 @@
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Bill</span>
                 <span class="text-sm font-bold text-slate-700">৳{{ summary.total_bill }}</span>
               </div>
-              <div class="w-px h-3 bg-slate-200"></div>
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Balance</span>
-                <span class="text-sm font-bold text-emerald-600">৳{{ summary.total_balance }}</span>
-              </div>
             </div>
           </div>
         </div>
@@ -133,9 +128,7 @@
                 <span class="text-gray-600 font-medium">{{ client.package?.name || 'N/A' }}</span>
               </td>
               <td v-if="isColVisible('bill')" class="px-4 py-3 leading-tight">
-                <div><span class="text-gray-400">Bill:</span> <span class="text-gray-700 font-bold">{{ client.monthly_fee }}</span></div>
-                <div><span class="text-gray-400">Balance:</span> <span class="text-emerald-500 font-bold">{{ client.balance || '0.00' }}</span></div>
-                <div><span class="text-gray-400">Due:</span> <span class="text-red-500 font-bold">{{ client.monthly_fee_due || '0.00' }}</span></div>
+                <div class="text-gray-700 font-bold">৳{{ client.monthly_fee }}</div>
               </td>
               <td v-if="isColVisible('all_date')" class="px-4 py-3">
                 <div class="text-gray-600 font-medium">{{ formatDate(client.joining_date) }}</div>

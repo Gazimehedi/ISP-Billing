@@ -18,9 +18,14 @@ use App\Http\Controllers\Api\Config\ZoneController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::middleware('auth:sanctum')->get('/user', [App\Http\Controllers\Api\ProfileController::class, 'me']);
+Route::middleware('auth:sanctum')->post('/user/update', [App\Http\Controllers\Api\ProfileController::class, 'update']);
+Route::middleware('auth:sanctum')->post('/user/update-password', [App\Http\Controllers\Api\ProfileController::class, 'updatePassword']);
+Route::middleware('auth:sanctum')->post('/user/update-mobile', [App\Http\Controllers\Api\ProfileController::class, 'updateMobile']);
+
+Route::get('/geo/divisions', [App\Http\Controllers\Api\Config\GeoController::class, 'divisions']);
+Route::get('/geo/districts/{division}', [App\Http\Controllers\Api\Config\GeoController::class, 'districts']);
+Route::get('/geo/thanas/{district}', [App\Http\Controllers\Api\Config\GeoController::class, 'thanas']);
 
 // Configuration Modules
 Route::prefix('config')->group(function () {

@@ -10,12 +10,15 @@
     <!-- Logo/Header Section -->
     <div class="px-3 py-3 border-b border-gray-50 bg-white flex items-center justify-between shrink-0">
       <div class="flex items-center space-x-2.5 min-w-0">
-        <div class="h-8 w-8 bg-[#00bcd4] rounded shadow-sm flex items-center justify-center shrink-0">
-            <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+        <div class="h-8 w-8 rounded shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
+            <img v-if="user?.profile_pic_url" :src="user.profile_pic_url" class="w-full h-full object-cover">
+            <div v-else class="w-full h-full bg-[#00bcd4] flex items-center justify-center">
+                 <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
         </div>
-        <span v-if="!isCollapsed" class="text-base font-bold text-gray-800 tracking-tight truncate">MH-ISP</span>
+        <span v-if="!isCollapsed" class="text-base font-bold text-gray-800 tracking-tight truncate">{{ user?.company_name || 'MH-ISP' }}</span>
       </div>
       
       <!-- Mobile Close Button -->
@@ -145,4 +148,22 @@ const menuGroups = ref([
     items: []
   }
 ]);
+
+const user = ref(null);
+const axios = window.axios || import('axios'); // Fallback if window.axios not ready yet, though it should be
+
+import { onMounted } from 'vue';
+
+const fetchUser = async () => {
+    try {
+        const res = await (window.axios ? window.axios.get('/api/user') : axios.get('/api/user'));
+        user.value = res.data;
+    } catch (e) {
+        console.error("Sidebar user fetch failed", e);
+    }
+};
+
+onMounted(() => {
+    fetchUser();
+});
 </script>
