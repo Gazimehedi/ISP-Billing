@@ -83,6 +83,21 @@ Route::prefix('config')->group(function () {
 
     Route::get('monitoring/alerts', [App\Http\Controllers\Api\Config\MonitoringController::class, 'getAlerts']);
     Route::post('monitoring/alerts/{alertId}/resolve', [App\Http\Controllers\Api\Config\MonitoringController::class, 'resolveAlert']);
+
+    // SMS Settings
+    Route::get('sms-templates', [App\Http\Controllers\Api\Config\SmsTemplateController::class, 'index']);
+    Route::get('sms-templates/{type}', [App\Http\Controllers\Api\Config\SmsTemplateController::class, 'show']);
+    Route::post('sms-templates', [App\Http\Controllers\Api\Config\SmsTemplateController::class, 'store']);
+    
+    Route::get('sms-gateway', [App\Http\Controllers\Api\Config\SmsConfigController::class, 'index']);
+    Route::post('sms-gateway', [App\Http\Controllers\Api\Config\SmsConfigController::class, 'store']);
+    Route::get('sms-gateway/balance', [App\Http\Controllers\Api\Config\SmsConfigController::class, 'checkBalance']);
+    Route::post('sms-gateway/test', [App\Http\Controllers\Api\Config\SmsConfigController::class, 'testSend']);
+
+    Route::get('sms-logs', [App\Http\Controllers\Api\Config\SmsLogController::class, 'index']);
+    Route::get('sms-logs/stats', [App\Http\Controllers\Api\Config\SmsLogController::class, 'stats']);
+    Route::delete('sms-logs/{id}', [App\Http\Controllers\Api\Config\SmsLogController::class, 'destroy']);
+    Route::post('sms-logs/clear', [App\Http\Controllers\Api\Config\SmsLogController::class, 'clearAll']);
 });
 
 // Billing

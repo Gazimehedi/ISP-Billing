@@ -143,6 +143,32 @@ const routes = [
                 name: 'ViewProfile',
                 component: () => import('../pages/profile/ViewProfile.vue'),
             },
+            // Message Module
+            {
+                path: 'message/gateway',
+                name: 'SmsGateway',
+                component: () => import('../pages/message/SmsGateway.vue'),
+            },
+            {
+                path: 'message/template',
+                name: 'SmsTemplate',
+                component: () => import('../pages/message/SmsTemplate.vue'),
+            },
+            {
+                path: 'message/bulk',
+                name: 'BulkMessage',
+                component: () => import('../pages/message/BulkMessage.vue'),
+            },
+            {
+                path: 'message/log',
+                name: 'MessageLog',
+                component: () => import('../pages/message/MessageLog.vue'),
+            },
+            {
+                path: 'message/invoice',
+                name: 'MessageInvoice',
+                component: () => import('../pages/message/MessageInvoice.vue'),
+            },
             {
                 path: '',
                 redirect: '/dashboard'
