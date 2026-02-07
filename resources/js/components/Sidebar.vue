@@ -10,17 +10,15 @@
     <!-- Logo/Header Section -->
     <div class="px-3.5 py-5 border-b border-gray-50 bg-white flex items-center shrink-0" :class="isCollapsed ? 'justify-center' : 'justify-between px-5'">
       <div class="flex items-center space-x-3.5 min-w-0">
-        <div class="h-10 w-10 rounded-xl shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-[#00bcd4]/10 border border-[#00bcd4]/20 group hover:scale-105 transition-all">
+        <div class="h-10 w-10 rounded-xl shadow-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-slate-100 group-hover:scale-105 transition-all duration-300">
             <img v-if="user?.profile_pic_url" :src="user.profile_pic_url" class="w-full h-full object-cover">
-            <div v-else class="w-full h-full bg-gradient-to-br from-[#00bcd4] to-[#00acc1] flex items-center justify-center">
-                 <svg class="h-6 w-6 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+            <div v-else class="w-full h-full bg-gradient-to-br from-[#00bcd4] to-[#01acc1] flex items-center justify-center">
+                 <span class="text-white font-black text-sm tracking-tighter">{{ companyInitials }}</span>
             </div>
         </div>
         <div v-if="!isCollapsed" class="flex flex-col min-w-0">
-          <span class="text-[15px] font-black text-slate-900 tracking-tight truncate leading-tight">{{ user?.company_name || 'MH-ISP' }}</span>
-          <span class="text-[9px] font-bold text-[#00bcd4] uppercase tracking-[0.2em] mt-0.5">Core System</span>
+          <span class="text-[15px] font-black text-slate-900 tracking-tight truncate leading-tight">{{ user?.company_name || '...' }}</span>
+          <span class="text-[9px] font-bold text-[#00bcd4] uppercase tracking-[0.2em] mt-0.5">{{ user?.system_label || 'Core System' }}</span>
         </div>
       </div>
       
@@ -42,7 +40,7 @@
             <button class="w-full flex items-center justify-between px-4 py-3 bg-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:border-[#00bcd4] hover:shadow-[0_4px_20px_rgba(0,188,212,0.1)] transition-all group-active:scale-95">
                 <div class="flex items-center gap-3 truncate">
                    <div class="w-2 h-2 rounded-full bg-[#00bcd4] animate-pulse ring-4 ring-[#00bcd4]/10"></div>
-                   <span class="truncate">Silicon Demo (Basic)</span>
+                   <span class="truncate">{{ user?.branch_name || 'System Default' }}</span>
                 </div>
                 <svg class="h-4 w-4 text-slate-300 group-hover:text-[#00bcd4] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
@@ -83,7 +81,7 @@
 <script setup>
 import SidebarLink from './SidebarLink.vue';
 import SidebarGroup from './SidebarGroup.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 defineProps({
   isCollapsed: Boolean,
@@ -168,7 +166,7 @@ const menuGroups = ref([
   }
 ]);
 
-const user = ref(null);
+const user = ref(JSON.parse(localStorage.getItem('user')) || null);
 const axiosFallback = window.axios || import('axios');
 
 const fetchUser = async () => {
@@ -179,6 +177,15 @@ const fetchUser = async () => {
         console.error("Sidebar user fetch failed", e);
     }
 };
+
+const companyInitials = computed(() => {
+    if (!user.value?.company_name) return '...';
+    const names = user.value.company_name.split(' ');
+    if (names.length >= 2) {
+        return (names[0][0] + names[1][0]).toUpperCase();
+    }
+    return user.value.company_name.substring(0, 2).toUpperCase();
+});
 
 onMounted(() => {
     fetchUser();

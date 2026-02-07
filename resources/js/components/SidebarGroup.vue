@@ -81,8 +81,8 @@
             class="flex items-center gap-3 px-3.5 py-2.5 text-[10.5px] font-bold transition-all rounded-xl relative group/sub truncate"
             :class="[
                $route.path === item.to 
-               ? 'text-[#00bcd4] bg-[#00bcd4]/10 font-black shadow-sm ring-1 ring-[#00bcd4]/20' 
-               : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'
+               ? 'text-[#00bcd4] font-black' 
+               : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50/50'
             ]"
           >
             <div 
@@ -141,6 +141,7 @@ const isActive = computed(() => {
 
 const toggleGroup = () => {
   if (props.isCollapsed) {
+    isOpen.value = true;
     emit('requestExpand');
     return;
   }
@@ -150,16 +151,27 @@ const toggleGroup = () => {
 const checkActive = () => {
     if (isActive.value && !props.isCollapsed) {
         isOpen.value = true;
-    } else {
+    } else if (props.isCollapsed) {
         isOpen.value = false;
     }
 };
 
 watch(() => route.path, checkActive);
-watch(() => props.isCollapsed, (newVal) => {
-    if (newVal) isOpen.value = false; 
-    else checkActive();
-});
+
+watch(() => props.isCollapsed, (isCollapsed) => {
+    if (isCollapsed) {
+        isOpen.value = false;
+    } else {
+        // If we are expanding, check if we should be open
+        // Either because we are active, or because we were opened via click
+        if (isActive.value) {
+            isOpen.value = true;
+        }
+        // If not active, we stay at whatever isOpen.value was 
+        // (which might be true if set by toggleGroup)
+    }
+}, { immediate: true });
+
 onMounted(checkActive);
 
 // Smooth height animations

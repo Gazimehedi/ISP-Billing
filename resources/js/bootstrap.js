@@ -9,6 +9,24 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
+// Add a response interceptor
+window.axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && [401, 419].includes(error.response.status)) {
+            // Clear auth state
+            localStorage.removeItem('is_auth');
+            localStorage.removeItem('user'); // Also removing user if stored
+
+            // Redirect to login page
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting

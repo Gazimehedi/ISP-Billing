@@ -15,6 +15,7 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $user->id,
             'nid_number' => 'required|string|max:20',
             'division_id' => 'required|exists:divisions,id',
             'district_id' => 'required|exists:districts,id',
@@ -27,7 +28,7 @@ class ProfileController extends Controller
         ]);
 
         $user->fill($request->only([
-            'name', 'nid_number', 'division_id', 'district_id', 'thana_id', 'address', 'company_name'
+            'name', 'email', 'nid_number', 'division_id', 'district_id', 'thana_id', 'address', 'company_name'
         ]));
 
         if ($request->hasFile('profile_pic')) {
@@ -96,7 +97,8 @@ class ProfileController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'mobile' => 'required|string|max:15|unique:users,mobile,' . $request->user()->id,
+            'country_code' => 'required|string|max:10',
+            'mobile' => 'required|string|max:15|unique:users,mobile,' . $request->user()->id . ',id,country_code,' . $request->country_code,
         ]);
 
         $user = $request->user();
@@ -108,6 +110,7 @@ class ProfileController extends Controller
         }
 
         $user->forceFill([
+            'country_code' => $request->country_code,
             'mobile' => $request->mobile,
         ])->save();
 
